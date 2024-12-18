@@ -1,36 +1,41 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'rania2001/mon-api'  
+    }
+
     stages {
-        stage('Checkout') {
+        stage('clone code') {
             steps {
-                // Cloner le code source depuis le dépôt
-                git 'https://votre-repo.git'
+                git 'https://github.com/rania20010430/express-api.git'
             }
         }
-
-        stage('Build Docker Image') {
+        stage('build') {
             steps {
-                // Construire l'image Docker
-                sh 'docker build -t rania2001/mon-api:1.0 .'
-            }
-        }
-
-        stage('Push to DockerHub') {
-            steps {
-                // Se connecter à DockerHub
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                script {
+                  docker.build("${DOCKER_IMAGE}:1.0")
                 }
-                // Pousser l'image
-                sh 'docker push rania2001/mon-api:1.0'
             }
         }
 
-        stage('Deploy Container') {
+        stage('push') {
             steps {
-                // Déployer le conteneur
-                sh 'docker run -d -p 3000:3000 rania2001/mon-api:1.0'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-login') {
+                        docker.image("${DOCKER_IMAGE}:1.0").push()
+                    }
+                }
+            }
+        }
+    stage('deploy') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'DockerHubLogin') {
+                        def docker_image = docker.image("${DOCKER_IMAGE}:1.0")
+                        docker_image.run('--name mini-projet -p 3000:3000')
+                 }
+                }
             }
         }
     }

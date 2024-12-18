@@ -9,6 +9,9 @@ let reservations = require('./reservations.json'); // Assurez-vous que ce fichie
 
 app.use(bodyParser.json());
 
+app.use('/', (req, res) => {
+    res.status(200).json(parkings);
+});
 
 app.get('/parkings', (req, res) => {
     res.status(200).json(parkings);
