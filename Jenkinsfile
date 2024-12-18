@@ -22,7 +22,7 @@ pipeline {
         stage('push') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-login') {
+                    docker.withRegistry('https://registry.hub.docker.com', 'DockerHubLogin') {
                         docker.image("${DOCKER_IMAGE}:1.0").push()
                     }
                 }
